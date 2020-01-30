@@ -10,19 +10,22 @@ import android.widget.TextView;
 
 import androidx.appcompat.widget.Toolbar;
 
+import java.text.NumberFormat;
+
 public class DetailedActivity extends AppCompatActivity {
 
     Toolbar toolbar;
     Intent intent;
     TextView inStock;
+    NumberFormat numberFormat = NumberFormat.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detailed);
 
-        toolbar = findViewById(R.id.toolbar_detailed);
         intent = getIntent();
+        toolbar = findViewById(R.id.toolbar_detailed);
         toolbar.setTitle(intent.getStringExtra("product_name"));
         setSupportActionBar(toolbar);
         if(getSupportActionBar() != null) {
@@ -37,6 +40,18 @@ public class DetailedActivity extends AppCompatActivity {
             }
         });
         inStock = findViewById(R.id.inStock);
-        inStock.setText(intent.getStringExtra("in_stock"));
+        numberFormat.setMaximumFractionDigits(2);
+        double stock = intent.getDoubleExtra("product_quantity", 0);
+        if(stock > 0) {
+            if(stock == Math.floor(stock) && !Double.isInfinite(stock)) {
+                inStock.setText(String.format(getResources().getString(R.string.in_stock), numberFormat.format(stock), "psc"));
+            } else {
+                inStock.setText(String.format(getResources().getString(R.string.in_stock), numberFormat.format(stock), "kg"));
+            }
+            inStock.setTextColor(getResources().getColor(R.color.colorPositive));
+        } else {
+            inStock.setText(getResources().getText(R.string.out_of_stock));
+            inStock.setTextColor(getResources().getColor(R.color.colorNegative));
+        }
     }
 }

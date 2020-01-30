@@ -17,6 +17,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
@@ -26,7 +27,7 @@ import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity implements ProductsRecyclerAdapter.OnProductClickListener, ProductsRecyclerAdapter.OnProductLongClickListener, ProductCreateDialog.ProductCreateDialogListener {
+public class MainActivity extends AppCompatActivity implements ProductsRecyclerAdapter.OnProductClickListener, ProductsRecyclerAdapter.OnProductLongClickListener, ProductCreateDialog.ProductCreateDialogListener, ProductEditDialog.ProductEditDialogListener {
 
     ArrayList<Product> products = new ArrayList<>();
     int selected;
@@ -84,7 +85,7 @@ public class MainActivity extends AppCompatActivity implements ProductsRecyclerA
         } else {
             Intent intent = new Intent(MainActivity.this, DetailedActivity.class);
             intent.putExtra("product_name", products.get(position).getName());
-            intent.putExtra("in_stock", products.get(position).getQuantity());
+            intent.putExtra("product_quantity", products.get(position).getQuantity());
             startActivity(intent);
         }
     }
@@ -114,6 +115,8 @@ public class MainActivity extends AppCompatActivity implements ProductsRecyclerA
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.edit:
+                    ProductEditDialog dialog = new ProductEditDialog(products.get(selected).getName(), products.get(selected).getPrice(), products.get(selected).getQuantity());
+                    dialog.show(getSupportFragmentManager(), "Edit Product");
                     mode.finish();
                     return true;
                 case R.id.delete:
@@ -139,9 +142,18 @@ public class MainActivity extends AppCompatActivity implements ProductsRecyclerA
     };
 
     @Override
-    public void createProduct(String name, String quantity) {
-        products.add(new Product(name, quantity));
+    public void createProduct(String name, double price, double quantity) {
+        products.add(new Product(name, price, quantity));
         adapter.notifyDataSetChanged();
+        saveData();
+    }
+
+    @Override
+    public void editProduct(String name, double price, double quantity) {
+        products.get(selected).setName(name);
+        products.get(selected).setPrice(price);
+        products.get(selected).setQuantity(quantity);
+        adapter.notifyItemChanged(selected);
         saveData();
     }
 

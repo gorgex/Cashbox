@@ -1,7 +1,6 @@
 package io.github.gorgex.cashbox.view;
 
-import androidx.appcompat.app.AlertDialog;
-
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -14,14 +13,26 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDialogFragment;
 
+import java.text.NumberFormat;
+
 import io.github.gorgex.cashbox.R;
 
-public class ProductCreateDialog extends AppCompatDialogFragment {
+public class ProductEditDialog extends AppCompatDialogFragment {
 
     private EditText productName;
     private EditText productPrice;
     private EditText productQuantity;
-    private ProductCreateDialogListener listener;
+    private ProductEditDialogListener listener;
+
+    private String name;
+    private double price;
+    private double quantity;
+
+    ProductEditDialog(String name, double price, double quantity) {
+        this.name = name;
+        this.price = price;
+        this.quantity = quantity;
+    }
 
     @NonNull
     @Override
@@ -31,29 +42,27 @@ public class ProductCreateDialog extends AppCompatDialogFragment {
         View view = inflater.inflate(R.layout.dialog_create_product, null);
 
         builder.setView(view)
-                .setTitle("Create a Product")
+                .setTitle("Edit Product")
                 .setPositiveButton("Save", new DialogInterface.OnClickListener() {
                     @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        String name = productName.getText().toString();
-                        String price = productPrice.getText().toString();
-                        String quantity = productQuantity.getText().toString();
-                        double p;
-                        double q;
-                        if (price.isEmpty()) {
-                            p = 0;
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        String n = productName.getText().toString();
+                        String p = productPrice.getText().toString();
+                        String q = productQuantity.getText().toString();
+                        if (p.isEmpty()) {
+                            price = 0;
                         } else {
-                            p = Double.parseDouble(price);
+                            price = Double.parseDouble(p);
                         }
-                        if (quantity.isEmpty()) {
-                            q = 0;
+                        if (q.isEmpty()) {
+                            quantity = 0;
                         } else {
-                            q = Double.parseDouble(quantity);
+                            quantity = Double.parseDouble(q);
                         }
-                        if (!name.isEmpty()) {
-                            listener.createProduct(name, p, q);
+                        if (!n.isEmpty()) {
+                            listener.editProduct(n, price, quantity);
                         } else {
-                            dialog.dismiss();
+                            dialogInterface.dismiss();
                         }
                     }
                 });
@@ -61,6 +70,10 @@ public class ProductCreateDialog extends AppCompatDialogFragment {
         productName = view.findViewById(R.id.product_name);
         productPrice = view.findViewById(R.id.product_price);
         productQuantity = view.findViewById(R.id.product_quantity);
+
+        productName.setText(name);
+        productPrice.setText(NumberFormat.getInstance().format(price));
+        productQuantity.setText(NumberFormat.getInstance().format(quantity));
 
         return builder.create();
     }
@@ -70,14 +83,14 @@ public class ProductCreateDialog extends AppCompatDialogFragment {
         super.onAttach(context);
 
         try {
-            listener = (ProductCreateDialogListener) context;
+            listener = (ProductEditDialog.ProductEditDialogListener) context;
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString() +
-                    "Must implement ProductCreateDialogListener");
+                    "Must implement ProductEditDialogListener");
         }
     }
 
-    public interface ProductCreateDialogListener {
-        void createProduct(String name, double price, double quantity);
+    public interface ProductEditDialogListener {
+        void editProduct(String name, double price, double quantity);
     }
 }

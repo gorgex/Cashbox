@@ -5,6 +5,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import java.text.NumberFormat;
 import java.util.ArrayList;
 
 import androidx.annotation.NonNull;
@@ -34,10 +35,16 @@ public class ProductsRecyclerAdapter extends RecyclerView.Adapter<ProductsRecycl
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         String name = products.get(position).getName();
-        String quantity = products.get(position).getQuantity();
+        double price = products.get(position).getPrice();
+        double quantity = products.get(position).getQuantity();
 
         holder.name.setText(name);
-        holder.quantity.setText(quantity);
+        holder.price.setText(String.format(holder.itemView.getResources().getString(R.string.gel), NumberFormat.getInstance().format(price)));
+        if(quantity == Math.floor(quantity) && !Double.isInfinite(quantity)) {
+            holder.quantity.setText(String.format(holder.itemView.getResources().getString(R.string.psc), NumberFormat.getInstance().format(quantity)));
+        } else {
+            holder.quantity.setText(String.format(holder.itemView.getResources().getString(R.string.kg), NumberFormat.getInstance().format(quantity)));
+        }
     }
 
     @Override
@@ -47,13 +54,14 @@ public class ProductsRecyclerAdapter extends RecyclerView.Adapter<ProductsRecycl
 
     class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
 
-        TextView name, quantity;
+        TextView name, price, quantity;
         OnProductClickListener onProductClickListener;
         OnProductLongClickListener onProductLongClickListener;
 
         ViewHolder(@NonNull View itemView, OnProductClickListener onProductClickListener, OnProductLongClickListener onProductLongClickListener) {
             super(itemView);
             name = itemView.findViewById(R.id.name);
+            price = itemView.findViewById(R.id.price);
             quantity = itemView.findViewById(R.id.quantity);
             this.onProductClickListener = onProductClickListener;
             this.onProductLongClickListener = onProductLongClickListener;

@@ -9,7 +9,15 @@
         android:id="@+id/product_name"
         android:layout_width="170dp"
         android:layout_height="wrap_content"
-        android:hint="Name"/>
+        android:hint="@string/hint_name"/>
+
+    <EditText
+        android:id="@+id/product_price"
+        android:layout_width="170dp"
+        android:layout_height="wrap_content"
+        android:inputType="numberDecimal"
+        android:maxLength="4"
+        android:hint="@string/hint_price" />
 
 
     <EditText
@@ -17,6 +25,7 @@
         android:layout_width="170dp"
         android:layout_height="wrap_content"
         android:inputType="numberDecimal"
-        android:hint="Quantity"/>
+        android:maxLength="4"
+        android:hint="@string/hint_quantity"/>
 
 </LinearLayout>
