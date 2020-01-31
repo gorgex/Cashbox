@@ -9,6 +9,11 @@
         <item name="windowActionModeOverlay">true</item>
         <item name="actionModeBackground">@color/colorPrimary</item>
         <item name="actionBarTheme">@style/ThemeOverlay.AppCompat.Dark.ActionBar</item>
+        <item name="android:alertDialogTheme">@style/AlertDialogTheme.Light</item>
+    </style>
+
+    <style name="AlertDialogTheme.Light" parent="ThemeOverlay.MaterialComponents.Dialog.Alert" >
+        <item name="android:buttonBarButtonStyle">@style/Widget.MaterialComponents.Button.TextButton</item>
     </style>
 
 </resources>
