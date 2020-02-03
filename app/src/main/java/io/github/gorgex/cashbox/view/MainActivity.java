@@ -10,11 +10,12 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import io.github.gorgex.cashbox.R;
 import io.github.gorgex.cashbox.adapters.ProductsRecyclerAdapter;
+import io.github.gorgex.cashbox.data.DataManager;
 import io.github.gorgex.cashbox.model.Product;
+import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.os.Bundle;
 import android.view.Menu;
@@ -25,36 +26,36 @@ import android.widget.Toast;
 
 
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import com.google.android.material.snackbar.BaseTransientBottomBar;
+import com.google.android.material.snackbar.Snackbar;
 
-import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Objects;
 
 import static androidx.recyclerview.widget.ItemTouchHelper.ACTION_STATE_SWIPE;
 
-public class MainActivity extends AppCompatActivity implements ProductsRecyclerAdapter.OnProductClickListener, ProductsRecyclerAdapter.OnProductLongClickListener, ProductCreateDialog.ProductCreateDialogListener, ProductEditDialog.ProductEditDialogListener {
+public class MainActivity extends AppCompatActivity implements ProductsRecyclerAdapter.OnProductClickListener, ProductsRecyclerAdapter.OnProductLongClickListener, ProductCreateDialog.ProductCreateDialogListener, ProductEditDialog.ProductEditDialogListener, ProductBuyDialog.ProductBuyDialogListener {
 
-    ArrayList<Product> products = new ArrayList<>();
-    int selected;
-    Toolbar toolbar;
-    RecyclerView recyclerView;
-    ProductsRecyclerAdapter adapter;
-    LinearLayoutManager layoutManager;
-    ExtendedFloatingActionButton fab;
-    ActionMode actionMode;
-    int actionModeState = 0;
-    boolean swipeBack = false;
+    private ArrayList<Product> products = new ArrayList<>();
+    private int selected;
+    private ProductsRecyclerAdapter adapter;
+    private LinearLayoutManager layoutManager;
+    private ExtendedFloatingActionButton fab;
+    private ActionMode actionMode;
+    private DataManager dataManager;
+    private int actionModeState = 0;
+    private boolean swipeBack = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        loadData();
-        toolbar = findViewById(R.id.toolbar_main);
+        dataManager = new DataManager(this, products);
+        products = dataManager.loadData();
+        Toolbar toolbar = findViewById(R.id.toolbar_main);
         setSupportActionBar(toolbar);
-        recyclerView = findViewById(R.id.recyclerView);
+        RecyclerView recyclerView = findViewById(R.id.recyclerView);
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.addItemDecoration(new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL));
@@ -103,7 +104,7 @@ public class MainActivity extends AppCompatActivity implements ProductsRecyclerA
     @Override
     public void onProductLongClick(int position) {
         selected = position;
-        layoutManager.findViewByPosition(position).setBackgroundColor(getResources().getColor(R.color.colorSelected));
+        Objects.requireNonNull(layoutManager.findViewByPosition(position)).setBackgroundColor(getResources().getColor(R.color.colorSelected));
         actionMode = startSupportActionMode(callback);
     }
 
@@ -115,7 +116,6 @@ public class MainActivity extends AppCompatActivity implements ProductsRecyclerA
 
         @Override
         public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-
         }
 
         @Override
@@ -130,16 +130,36 @@ public class MainActivity extends AppCompatActivity implements ProductsRecyclerA
 
         @SuppressLint("ClickableViewAccessibility")
         @Override
-        public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
+        public void onChildDraw(@NonNull Canvas c, @NonNull final RecyclerView recyclerView, @NonNull final RecyclerView.ViewHolder viewHolder, final float dX, float dY, int actionState, boolean isCurrentlyActive) {
+            final double third = c.getWidth() / 3;
             if(actionState == ACTION_STATE_SWIPE) {
                 recyclerView.setOnTouchListener(new View.OnTouchListener() {
                     @Override
                     public boolean onTouch(View v, MotionEvent event) {
                         swipeBack = event.getAction() == MotionEvent.ACTION_CANCEL || event.getAction() == MotionEvent.ACTION_UP;
+                        if(swipeBack) {
+                            if(dX < -third) {
+                                selected = viewHolder.getAdapterPosition();
+                                Snackbar.make(recyclerView, "Sell", Snackbar.LENGTH_SHORT).setAnimationMode(BaseTransientBottomBar.ANIMATION_MODE_SLIDE).show();
+                            } else if(dX > third) {
+                                selected = viewHolder.getAdapterPosition();
+                                ProductBuyDialog dialog = new ProductBuyDialog();
+                                dialog.show(getSupportFragmentManager(), "Buy a Product");
+                            }
+                        }
                         return false;
                     }
                 });
             }
+
+            new RecyclerViewSwipeDecorator.Builder(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
+                    .addSwipeLeftBackgroundColor(getResources().getColor(R.color.colorNegative))
+                    .addSwipeLeftLabel("Sell").setSwipeLeftLabelColor(getResources().getColor(android.R.color.white))
+                    .addSwipeRightBackgroundColor(getResources().getColor(R.color.colorPositive))
+                    .addSwipeRightLabel("Buy").setSwipeRightLabelColor(getResources().getColor(android.R.color.white))
+                    .create()
+                    .decorate();
+
             super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
         }
     };
@@ -172,7 +192,7 @@ public class MainActivity extends AppCompatActivity implements ProductsRecyclerA
                     if(!fab.isExtended()) {
                         fab.extend();
                     }
-                    saveData();
+                    dataManager.saveData();
                     mode.finish();
                     return true;
                 default:
@@ -182,7 +202,7 @@ public class MainActivity extends AppCompatActivity implements ProductsRecyclerA
 
         @Override
         public void onDestroyActionMode(ActionMode mode) {
-            layoutManager.findViewByPosition(selected).setBackgroundColor(getResources().getColor(R.color.colorDeselected));
+            Objects.requireNonNull(layoutManager.findViewByPosition(selected)).setBackgroundColor(getResources().getColor(R.color.colorDeselected));
             actionModeState = 0;
             actionMode = null;
         }
@@ -192,7 +212,7 @@ public class MainActivity extends AppCompatActivity implements ProductsRecyclerA
     public void createProduct(String name, double price, double quantity) {
         products.add(new Product(name, price, quantity));
         adapter.notifyDataSetChanged();
-        saveData();
+        dataManager.saveData();
     }
 
     @Override
@@ -201,27 +221,14 @@ public class MainActivity extends AppCompatActivity implements ProductsRecyclerA
         products.get(selected).setPrice(price);
         products.get(selected).setQuantity(quantity);
         adapter.notifyItemChanged(selected);
-        saveData();
+        dataManager.saveData();
     }
 
-    private void saveData() {
-        SharedPreferences sharedPreferences = getSharedPreferences("shared preferences", MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        Gson gson = new Gson();
-        String json = gson.toJson(products);
-        editor.putString("products", json);
-        editor.apply();
-    }
-
-    private void loadData() {
-        SharedPreferences sharedPreferences = getSharedPreferences("shared preferences", MODE_PRIVATE);
-        Gson gson = new Gson();
-        String json = sharedPreferences.getString("products", null);
-        Type type = new TypeToken<ArrayList<Product>>() {}.getType();
-        products = gson.fromJson(json, type);
-
-        if(products == null) {
-            products = new ArrayList<>();
-        }
+    @Override
+    public void buyProduct(double quantity) {
+        double inStock = products.get(selected).getQuantity();
+        products.get(selected).setQuantity(inStock + quantity);
+        adapter.notifyItemChanged(selected);
+        dataManager.saveData();
     }
 }

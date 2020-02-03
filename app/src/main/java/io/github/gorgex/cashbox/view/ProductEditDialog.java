@@ -10,7 +10,6 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -20,10 +19,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDialogFragment;
 
-import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputLayout;
 
 import java.text.NumberFormat;
+import java.util.Objects;
 
 import io.github.gorgex.cashbox.R;
 
@@ -51,8 +50,8 @@ public class ProductEditDialog extends AppCompatDialogFragment {
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        LayoutInflater inflater = getActivity().getLayoutInflater();
-        View view = inflater.inflate(R.layout.dialog_create_product, null);
+        LayoutInflater inflater = Objects.requireNonNull(getActivity()).getLayoutInflater();
+        @SuppressLint("InflateParams") View view = inflater.inflate(R.layout.dialog_create_product, null);
 
         nameInputLayout = view.findViewById(R.id.nameInputLayout);
         productName = view.findViewById(R.id.product_name);
@@ -63,9 +62,9 @@ public class ProductEditDialog extends AppCompatDialogFragment {
         productName.setText(name);
         productPrice.setText(NumberFormat.getInstance().format(price));
         productQuantity.setText(NumberFormat.getInstance().format(quantity));
-
         builder.setView(view)
                 .setTitle("Edit Product")
+                .setPositiveButton("Save", null)
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
@@ -73,7 +72,6 @@ public class ProductEditDialog extends AppCompatDialogFragment {
                     }
                 });
 
-        builder.setPositiveButton("Save", null);
         productName.requestFocus();
         inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
 

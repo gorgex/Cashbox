@@ -23,6 +23,8 @@ import androidx.appcompat.app.AppCompatDialogFragment;
 
 import com.google.android.material.textfield.TextInputLayout;
 
+import java.util.Objects;
+
 import io.github.gorgex.cashbox.R;
 
 public class ProductCreateDialog extends AppCompatDialogFragment {
@@ -40,9 +42,9 @@ public class ProductCreateDialog extends AppCompatDialogFragment {
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        AlertDialog.Builder builder = new AlertDialog.Builder(Objects.requireNonNull(getActivity()));
         LayoutInflater inflater = getActivity().getLayoutInflater();
-        View view = inflater.inflate(R.layout.dialog_create_product, null);
+        @SuppressLint("InflateParams") View view = inflater.inflate(R.layout.dialog_create_product, null);
 
         nameInputLayout = view.findViewById(R.id.nameInputLayout);
         productName = view.findViewById(R.id.product_name);
@@ -52,13 +54,14 @@ public class ProductCreateDialog extends AppCompatDialogFragment {
 
         builder.setView(view)
                 .setTitle("Create a Product")
+                .setPositiveButton("Save", null)
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         inputMethodManager.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
                     }
                 });
-        builder.setPositiveButton("Save", null);
+
         productName.requestFocus();
         inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
 

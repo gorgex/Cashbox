@@ -54,9 +54,9 @@ public class ProductsRecyclerAdapter extends RecyclerView.Adapter<ProductsRecycl
 
     class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
 
-        TextView name, price, quantity;
-        OnProductClickListener onProductClickListener;
-        OnProductLongClickListener onProductLongClickListener;
+        private TextView name, price, quantity;
+        private OnProductClickListener onProductClickListener;
+        private OnProductLongClickListener onProductLongClickListener;
 
         ViewHolder(@NonNull View itemView, OnProductClickListener onProductClickListener, OnProductLongClickListener onProductLongClickListener) {
             super(itemView);
