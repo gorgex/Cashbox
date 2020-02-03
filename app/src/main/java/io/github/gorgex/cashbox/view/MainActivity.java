@@ -5,17 +5,21 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.view.ActionMode;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import io.github.gorgex.cashbox.R;
 import io.github.gorgex.cashbox.adapters.ProductsRecyclerAdapter;
 import io.github.gorgex.cashbox.model.Product;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Canvas;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
 
@@ -26,6 +30,8 @@ import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+
+import static androidx.recyclerview.widget.ItemTouchHelper.ACTION_STATE_SWIPE;
 
 public class MainActivity extends AppCompatActivity implements ProductsRecyclerAdapter.OnProductClickListener, ProductsRecyclerAdapter.OnProductLongClickListener, ProductCreateDialog.ProductCreateDialogListener, ProductEditDialog.ProductEditDialogListener {
 
@@ -38,6 +44,7 @@ public class MainActivity extends AppCompatActivity implements ProductsRecyclerA
     ExtendedFloatingActionButton fab;
     ActionMode actionMode;
     int actionModeState = 0;
+    boolean swipeBack = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,6 +83,9 @@ public class MainActivity extends AppCompatActivity implements ProductsRecyclerA
                 }
             }
         });
+
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
+        itemTouchHelper.attachToRecyclerView(recyclerView);
     }
 
     @Override
@@ -96,6 +106,43 @@ public class MainActivity extends AppCompatActivity implements ProductsRecyclerA
         layoutManager.findViewByPosition(position).setBackgroundColor(getResources().getColor(R.color.colorSelected));
         actionMode = startSupportActionMode(callback);
     }
+
+    ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+        @Override
+        public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+            return false;
+        }
+
+        @Override
+        public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+
+        }
+
+        @Override
+        public int convertToAbsoluteDirection(int flags, int layoutDirection) {
+
+            if(swipeBack) {
+                swipeBack = false;
+                return 0;
+            }
+            return super.convertToAbsoluteDirection(flags, layoutDirection);
+        }
+
+        @SuppressLint("ClickableViewAccessibility")
+        @Override
+        public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
+            if(actionState == ACTION_STATE_SWIPE) {
+                recyclerView.setOnTouchListener(new View.OnTouchListener() {
+                    @Override
+                    public boolean onTouch(View v, MotionEvent event) {
+                        swipeBack = event.getAction() == MotionEvent.ACTION_CANCEL || event.getAction() == MotionEvent.ACTION_UP;
+                        return false;
+                    }
+                });
+            }
+            super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
+        }
+    };
 
     private ActionMode.Callback callback = new ActionMode.Callback() {
         @Override

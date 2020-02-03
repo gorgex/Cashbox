@@ -23,8 +23,6 @@ import androidx.appcompat.app.AppCompatDialogFragment;
 
 import com.google.android.material.textfield.TextInputLayout;
 
-import java.text.NumberFormat;
-
 import io.github.gorgex.cashbox.R;
 
 public class ProductCreateDialog extends AppCompatDialogFragment {
@@ -119,9 +117,9 @@ public class ProductCreateDialog extends AppCompatDialogFragment {
         save.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String name = productName.getText().toString();
-                String price = productPrice.getText().toString();
-                String quantity = productQuantity.getText().toString();
+                String name = productName.getText().toString().trim();
+                String price = productPrice.getText().toString().trim();
+                String quantity = productQuantity.getText().toString().trim();
                 double p;
                 double q;
                 if (price.isEmpty()) {

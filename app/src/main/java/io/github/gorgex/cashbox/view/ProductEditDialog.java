@@ -85,9 +85,6 @@ public class ProductEditDialog extends AppCompatDialogFragment {
         dialog.show();
         dialog.setCanceledOnTouchOutside(false);
         save = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
-//        Button cancel = dialog.getButton(DialogInterface.BUTTON_NEGATIVE);
-//        cancel.setTextColor(getResources().getColor(R.color.colorPrimary));
-//        cancel.setBackgroundColor(getResources().getColor(android.R.color.transparent));
 
         productName.addTextChangedListener(new TextWatcher() {
             @Override
@@ -114,9 +111,9 @@ public class ProductEditDialog extends AppCompatDialogFragment {
         save.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String n = productName.getText().toString();
-                String p = productPrice.getText().toString();
-                String q = productQuantity.getText().toString();
+                String n = productName.getText().toString().trim();
+                String p = productPrice.getText().toString().trim();
+                String q = productQuantity.getText().toString().trim();
                 if (p.isEmpty()) {
                     price = 0;
                 } else {
