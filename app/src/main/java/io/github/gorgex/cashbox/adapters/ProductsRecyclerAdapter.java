@@ -37,14 +37,12 @@ public class ProductsRecyclerAdapter extends RecyclerView.Adapter<ProductsRecycl
         String name = products.get(position).getName();
         double price = products.get(position).getPrice();
         double quantity = products.get(position).getQuantity();
+        String type = products.get(position).getType();
 
         holder.name.setText(name);
         holder.price.setText(String.format(holder.itemView.getResources().getString(R.string.gel), NumberFormat.getInstance().format(price)));
-        if(quantity == Math.floor(quantity) && !Double.isInfinite(quantity)) {
-            holder.quantity.setText(String.format(holder.itemView.getResources().getString(R.string.psc), NumberFormat.getInstance().format(quantity)));
-        } else {
-            holder.quantity.setText(String.format(holder.itemView.getResources().getString(R.string.kg), NumberFormat.getInstance().format(quantity)));
-        }
+        holder.quantity.setText(NumberFormat.getInstance().format(quantity));
+        holder.type.setText(type);
     }
 
     @Override
@@ -54,7 +52,7 @@ public class ProductsRecyclerAdapter extends RecyclerView.Adapter<ProductsRecycl
 
     class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
 
-        private TextView name, price, quantity;
+        private TextView name, price, quantity, type;
         private OnProductClickListener onProductClickListener;
         private OnProductLongClickListener onProductLongClickListener;
 
@@ -63,6 +61,7 @@ public class ProductsRecyclerAdapter extends RecyclerView.Adapter<ProductsRecycl
             name = itemView.findViewById(R.id.name);
             price = itemView.findViewById(R.id.price);
             quantity = itemView.findViewById(R.id.quantity);
+            type = itemView.findViewById(R.id.type);
             this.onProductClickListener = onProductClickListener;
             this.onProductLongClickListener = onProductLongClickListener;
 

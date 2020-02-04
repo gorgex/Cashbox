@@ -11,6 +11,8 @@
     <string name="in_stock">In stock: %1$s %2$s</string>
     <string name="out_of_stock">Out of stock</string>
     <string name="gel">%1$s gel</string>
-    <string name="psc">%1$s psc</string>
-    <string name="kg">%1$s kg</string>
+    <string name="type_psc">%1$s psc</string>
+    <string name="type_kg">%1$s kg</string>
+    <string name="psc">psc</string>
+    <string name="kg">kg</string>
 </resources>

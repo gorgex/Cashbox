@@ -209,8 +209,8 @@ public class MainActivity extends AppCompatActivity implements ProductsRecyclerA
     };
 
     @Override
-    public void createProduct(String name, double price, double quantity) {
-        products.add(new Product(name, price, quantity));
+    public void createProduct(String name, double price, double quantity, String type) {
+        products.add(new Product(name, price, quantity, type));
         adapter.notifyDataSetChanged();
         dataManager.saveData();
     }

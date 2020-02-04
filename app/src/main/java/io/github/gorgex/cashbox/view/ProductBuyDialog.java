@@ -73,14 +73,11 @@ public class ProductBuyDialog extends AppCompatDialogFragment {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 buyQuantity.setError(null);
-                if(s.charAt(0) == '.') {
-                    dialog.dismiss();
-                }
             }
 
             @Override
             public void afterTextChanged(Editable s) {
-                if(s.toString().isEmpty() || Double.parseDouble(s.toString()) <= 0 || s.charAt(0) == '.') {
+                if(s.toString().isEmpty() || (s.toString().length() == 1 && s.toString().charAt(0) == '.') || Double.parseDouble(s.toString()) <= 0) {
                     buyQuantity.setError("Quantity should be a positive number");
                     add.setEnabled(false);
                 } else {
@@ -116,7 +113,7 @@ public class ProductBuyDialog extends AppCompatDialogFragment {
             listener = (ProductBuyDialog.ProductBuyDialogListener) context;
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString() +
-                    "Must implement ProductCreateDialogListener");
+                    "Must implement ProductBuyDialogListener");
         }
     }
 

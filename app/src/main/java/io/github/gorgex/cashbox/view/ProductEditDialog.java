@@ -54,9 +54,9 @@ public class ProductEditDialog extends AppCompatDialogFragment {
         @SuppressLint("InflateParams") View view = inflater.inflate(R.layout.dialog_create_product, null);
 
         nameInputLayout = view.findViewById(R.id.nameInputLayout);
-        productName = view.findViewById(R.id.product_name);
-        productPrice = view.findViewById(R.id.product_price);
-        productQuantity = view.findViewById(R.id.product_quantity);
+        productName = view.findViewById(R.id.productName);
+        productPrice = view.findViewById(R.id.productPrice);
+        productQuantity = view.findViewById(R.id.productQuantity);
         inputMethodManager = (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
 
         productName.setText(name);
