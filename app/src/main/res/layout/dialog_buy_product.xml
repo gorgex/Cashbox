@@ -14,12 +14,11 @@
         app:errorEnabled="true">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/product_quantity"
+            android:id="@+id/productQuantity"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/hint_quantity"
-            android:inputType="numberDecimal"
-            android:maxLength="4" />
+            android:inputType="numberDecimal" />
 
     </com.google.android.material.textfield.TextInputLayout>
 

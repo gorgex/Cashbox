@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import io.github.gorgex.cashbox.R;
 import io.github.gorgex.cashbox.adapters.ProductsRecyclerAdapter;
 import io.github.gorgex.cashbox.data.DataManager;
@@ -22,8 +23,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Toast;
-
 
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
@@ -67,7 +66,7 @@ public class MainActivity extends AppCompatActivity implements ProductsRecyclerA
             public void onClick(View v) {
                 ProductCreateDialog dialog = new ProductCreateDialog();
                 dialog.show(getSupportFragmentManager(), "Create Product");
-                if(actionModeState == 1) {
+                if (actionModeState == 1) {
                     actionMode.finish();
                 }
             }
@@ -77,9 +76,9 @@ public class MainActivity extends AppCompatActivity implements ProductsRecyclerA
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
-                if(dy > 0) {
+                if (dy > 0) {
                     fab.shrink();
-                } else if(dy < 0) {
+                } else if (dy < 0) {
                     fab.extend();
                 }
             }
@@ -91,7 +90,7 @@ public class MainActivity extends AppCompatActivity implements ProductsRecyclerA
 
     @Override
     public void onProductClick(int position) {
-        if(actionModeState == 1) {
+        if (actionModeState == 1) {
             actionMode.finish();
         } else {
             Intent intent = new Intent(MainActivity.this, DetailedActivity.class);
@@ -121,7 +120,7 @@ public class MainActivity extends AppCompatActivity implements ProductsRecyclerA
         @Override
         public int convertToAbsoluteDirection(int flags, int layoutDirection) {
 
-            if(swipeBack) {
+            if (swipeBack) {
                 swipeBack = false;
                 return 0;
             }
@@ -132,16 +131,16 @@ public class MainActivity extends AppCompatActivity implements ProductsRecyclerA
         @Override
         public void onChildDraw(@NonNull Canvas c, @NonNull final RecyclerView recyclerView, @NonNull final RecyclerView.ViewHolder viewHolder, final float dX, float dY, int actionState, boolean isCurrentlyActive) {
             final double third = c.getWidth() / 3;
-            if(actionState == ACTION_STATE_SWIPE) {
+            if (actionState == ACTION_STATE_SWIPE) {
                 recyclerView.setOnTouchListener(new View.OnTouchListener() {
                     @Override
                     public boolean onTouch(View v, MotionEvent event) {
                         swipeBack = event.getAction() == MotionEvent.ACTION_CANCEL || event.getAction() == MotionEvent.ACTION_UP;
-                        if(swipeBack) {
-                            if(dX < -third) {
+                        if (swipeBack) {
+                            if (dX < -third) {
                                 selected = viewHolder.getAdapterPosition();
                                 Snackbar.make(recyclerView, "Sell", Snackbar.LENGTH_SHORT).setAnimationMode(BaseTransientBottomBar.ANIMATION_MODE_SLIDE).show();
-                            } else if(dX > third) {
+                            } else if (dX > third) {
                                 selected = viewHolder.getAdapterPosition();
                                 ProductBuyDialog dialog = new ProductBuyDialog();
                                 dialog.show(getSupportFragmentManager(), "Buy a Product");
@@ -182,14 +181,14 @@ public class MainActivity extends AppCompatActivity implements ProductsRecyclerA
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.edit:
-                    ProductEditDialog dialog = new ProductEditDialog(products.get(selected).getName(), products.get(selected).getPrice(), products.get(selected).getQuantity());
+                    ProductEditDialog dialog = new ProductEditDialog(products.get(selected).getName(), products.get(selected).getPrice(), products.get(selected).getQuantity(), products.get(selected).getType());
                     dialog.show(getSupportFragmentManager(), "Edit Product");
                     mode.finish();
                     return true;
                 case R.id.delete:
                     products.remove(selected);
                     adapter.notifyItemRemoved(selected);
-                    if(!fab.isExtended()) {
+                    if (!fab.isExtended()) {
                         fab.extend();
                     }
                     dataManager.saveData();
@@ -216,10 +215,11 @@ public class MainActivity extends AppCompatActivity implements ProductsRecyclerA
     }
 
     @Override
-    public void editProduct(String name, double price, double quantity) {
+    public void editProduct(String name, double price, double quantity, String type) {
         products.get(selected).setName(name);
         products.get(selected).setPrice(price);
         products.get(selected).setQuantity(quantity);
+        products.get(selected).setType(type);
         adapter.notifyItemChanged(selected);
         dataManager.saveData();
     }

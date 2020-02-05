@@ -41,7 +41,7 @@ public class ProductBuyDialog extends AppCompatDialogFragment {
         @SuppressLint("InflateParams") View view = inflater.inflate(R.layout.dialog_buy_product, null);
 
         quantityInputLayout = view.findViewById(R.id.quantityInputLayout);
-        buyQuantity = view.findViewById(R.id.product_quantity);
+        buyQuantity = view.findViewById(R.id.productQuantity);
         inputMethodManager = (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
 
         builder.setView(view)
@@ -77,7 +77,7 @@ public class ProductBuyDialog extends AppCompatDialogFragment {
 
             @Override
             public void afterTextChanged(Editable s) {
-                if(s.toString().isEmpty() || (s.toString().length() == 1 && s.toString().charAt(0) == '.') || Double.parseDouble(s.toString()) <= 0) {
+                if (s.toString().isEmpty() || (s.toString().length() == 1 && s.toString().charAt(0) == '.') || Double.parseDouble(s.toString()) <= 0) {
                     buyQuantity.setError("Quantity should be a positive number");
                     add.setEnabled(false);
                 } else {
@@ -91,7 +91,7 @@ public class ProductBuyDialog extends AppCompatDialogFragment {
             public void onClick(View v) {
                 String quantity = buyQuantity.getText().toString().trim();
                 double q;
-                if(quantity.isEmpty()) {
+                if (quantity.isEmpty()) {
                     buyQuantity.setError("Quantity should be a positive number");
                 } else {
                     q = Double.parseDouble(quantity);

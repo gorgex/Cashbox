@@ -9,6 +9,8 @@ import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.InputFilter;
+import android.text.Spanned;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -26,6 +28,8 @@ import androidx.appcompat.app.AppCompatDialogFragment;
 import com.google.android.material.textfield.TextInputLayout;
 
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import io.github.gorgex.cashbox.R;
 
@@ -37,9 +41,9 @@ public class ProductCreateDialog extends AppCompatDialogFragment {
     private EditText productNameEditText;
     private EditText productPriceEditText;
     private EditText productQuantityEditText;
-    private Button save;
     private RadioGroup productTypeRadioGroup;
     private RadioButton productTypeRadioButton;
+    private Button save;
     private ProductCreateDialogListener listener;
     private InputMethodManager inputMethodManager;
 
@@ -142,6 +146,7 @@ public class ProductCreateDialog extends AppCompatDialogFragment {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
+                productPriceEditText.setFilters(new InputFilter[]{new DecimalDigitsInputFilter()});
                 priceInputLayout.setError(null);
             }
 
@@ -167,6 +172,12 @@ public class ProductCreateDialog extends AppCompatDialogFragment {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if(s.toString().contains(".")) {
+                    productTypeRadioGroup.check(productTypeRadioGroup.findViewById(R.id.kg).getId());
+                } else {
+                    productTypeRadioGroup.check(productTypeRadioGroup.findViewById(R.id.psc).getId());
+                }
+                productQuantityEditText.setFilters(new InputFilter[]{new DecimalDigitsInputFilter()});
                 quantityInputLayout.setError(null);
             }
 
@@ -219,6 +230,29 @@ public class ProductCreateDialog extends AppCompatDialogFragment {
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString() +
                     "Must implement ProductCreateDialogListener");
+        }
+    }
+
+    public class DecimalDigitsInputFilter implements InputFilter {
+
+        Pattern pattern;
+
+        DecimalDigitsInputFilter() {
+            this.pattern = Pattern.compile("^[0-9]+([.][0-9]{0,2})?$");
+        }
+
+        @Override
+        public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
+            if(source.equals("")) {
+                return null;
+            }
+            StringBuilder builder = new StringBuilder(dest);
+            builder.replace(dstart, dend, source.subSequence(start, end).toString());
+            Matcher matcher = pattern.matcher(builder);
+            if (!matcher.matches()) {
+                return "";
+            }
+            return null;
         }
     }
 
