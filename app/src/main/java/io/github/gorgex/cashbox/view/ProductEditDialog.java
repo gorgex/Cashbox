@@ -18,6 +18,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -26,8 +27,6 @@ import androidx.appcompat.app.AppCompatDialogFragment;
 import com.google.android.material.textfield.TextInputLayout;
 
 import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import io.github.gorgex.cashbox.R;
 
@@ -78,6 +77,16 @@ public class ProductEditDialog extends AppCompatDialogFragment {
         productNameEditText.setText(name);
         productPriceEditText.setText(String.valueOf(price));
         productQuantityEditText.setText(String.valueOf(quantity));
+
+        String p = productPriceEditText.getText().toString();
+        if(p.contains(".") && p.indexOf(".") == p.length() - 3) {
+            productPriceEditText.setFilters(new InputFilter[]{new DecimalDigitsInputFilter()});
+        }
+
+        String q = productQuantityEditText.getText().toString();
+        if(q.contains(".") && q.indexOf(".") == q.length() - 3) {
+            productQuantityEditText.setFilters(new InputFilter[]{new DecimalDigitsInputFilter()});
+        }
 
         if(type.equals("psc")) {
             productTypeRadioButton = productTypeRadioGroup.findViewById(R.id.psc);
@@ -148,6 +157,9 @@ public class ProductEditDialog extends AppCompatDialogFragment {
             @Override
             public void afterTextChanged(Editable editable) {
                 if (editable.length() == 1 && editable.charAt(0) == '.') {
+                    productPriceEditText.removeTextChangedListener(this);
+                    productPriceEditText.setText("");
+                    productPriceEditText.addTextChangedListener(this);
                     priceInputLayout.setError("Invalid price");
                     save.setEnabled(false);
                 } else if (productNameEditText.getText().toString().isEmpty() ||
@@ -166,18 +178,22 @@ public class ProductEditDialog extends AppCompatDialogFragment {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
+                productQuantityEditText.setFilters(new InputFilter[]{new ProductEditDialog.DecimalDigitsInputFilter()});
+                quantityInputLayout.setError(null);
+
                 if(s.toString().contains(".")) {
                     productTypeRadioGroup.check(productTypeRadioGroup.findViewById(R.id.kg).getId());
                 } else {
                     productTypeRadioGroup.check(productTypeRadioGroup.findViewById(R.id.psc).getId());
                 }
-                productQuantityEditText.setFilters(new InputFilter[]{new ProductEditDialog.DecimalDigitsInputFilter()});
-                quantityInputLayout.setError(null);
             }
 
             @Override
             public void afterTextChanged(Editable editable) {
                 if (editable.length() == 1 && editable.charAt(0) == '.') {
+                    productQuantityEditText.removeTextChangedListener(this);
+                    productQuantityEditText.setText("");
+                    productQuantityEditText.addTextChangedListener(this);
                     quantityInputLayout.setError("Invalid quantity");
                     save.setEnabled(false);
                 } else if (productNameEditText.getText().toString().isEmpty() ||
@@ -229,16 +245,10 @@ public class ProductEditDialog extends AppCompatDialogFragment {
 
     public class DecimalDigitsInputFilter implements InputFilter {
 
-        Pattern pattern;
-
-        DecimalDigitsInputFilter() {
-            this.pattern = Pattern.compile("[0-9]*+((\\.[0-9]?)?)|(\\.)?");
-        }
-
         @Override
         public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
-            Matcher matcher = pattern.matcher(dest);
-            if (!matcher.matches()) {
+            String value = dest.toString();
+            if(value.contains(".") && value.indexOf(".") == value.length() - 3) {
                 return "";
             }
             return null;
