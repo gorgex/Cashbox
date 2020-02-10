@@ -17,7 +17,6 @@ public class DetailedActivity extends AppCompatActivity {
     Toolbar toolbar;
     Intent intent;
     TextView inStock;
-    NumberFormat numberFormat = NumberFormat.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,13 +24,16 @@ public class DetailedActivity extends AppCompatActivity {
         setContentView(R.layout.activity_detailed);
 
         intent = getIntent();
+
         toolbar = findViewById(R.id.toolbar_detailed);
         toolbar.setTitle(intent.getStringExtra("product_name"));
         setSupportActionBar(toolbar);
+
         if(getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setDisplayShowHomeEnabled(true);
         }
+
         toolbar.setNavigationIcon(getResources().getDrawable(R.drawable.ic_arrow_back));
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -39,14 +41,17 @@ public class DetailedActivity extends AppCompatActivity {
                 onBackPressed();
             }
         });
+
         inStock = findViewById(R.id.inStock);
-        numberFormat.setMaximumFractionDigits(2);
+
         double stock = intent.getDoubleExtra("product_quantity", 0);
+        String type = intent.getStringExtra("product_type");
         if(stock > 0) {
-            if(stock == Math.floor(stock) && !Double.isInfinite(stock)) {
-                inStock.setText(String.format(getResources().getString(R.string.in_stock), numberFormat.format(stock), "psc"));
+            assert type != null;
+            if(type.equals("psc")) {
+                inStock.setText(String.format(getResources().getString(R.string.in_stock), NumberFormat.getInstance().format(stock), "psc"));
             } else {
-                inStock.setText(String.format(getResources().getString(R.string.in_stock), numberFormat.format(stock), "kg"));
+                inStock.setText(String.format(getResources().getString(R.string.in_stock), NumberFormat.getInstance().format(stock), "kg"));
             }
             inStock.setTextColor(getResources().getColor(R.color.colorPositive));
         } else {

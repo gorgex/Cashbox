@@ -5,7 +5,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import java.text.NumberFormat;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 import androidx.annotation.NonNull;
@@ -39,9 +39,12 @@ public class ProductsRecyclerAdapter extends RecyclerView.Adapter<ProductsRecycl
         double quantity = products.get(position).getQuantity();
         String type = products.get(position).getType();
 
+        DecimalFormat priceFormat = new DecimalFormat();
+        priceFormat.setMinimumFractionDigits(2);
+
         holder.name.setText(name);
-        holder.price.setText(String.format(holder.itemView.getResources().getString(R.string.gel), NumberFormat.getInstance().format(price)));
-        holder.quantity.setText(NumberFormat.getInstance().format(quantity));
+        holder.price.setText(String.format(holder.itemView.getResources().getString(R.string.gel), priceFormat.format(price)));
+        holder.quantity.setText(DecimalFormat.getInstance().format(quantity));
         holder.type.setText(type);
     }
 

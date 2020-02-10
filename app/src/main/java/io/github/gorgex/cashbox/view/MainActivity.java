@@ -96,6 +96,7 @@ public class MainActivity extends AppCompatActivity implements ProductsRecyclerA
             Intent intent = new Intent(MainActivity.this, DetailedActivity.class);
             intent.putExtra("product_name", products.get(position).getName());
             intent.putExtra("product_quantity", products.get(position).getQuantity());
+            intent.putExtra("product_type", products.get(position).getType());
             startActivity(intent);
         }
     }

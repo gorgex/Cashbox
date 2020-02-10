@@ -26,6 +26,8 @@ import androidx.appcompat.app.AppCompatDialogFragment;
 
 import com.google.android.material.textfield.TextInputLayout;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.Objects;
 
 import io.github.gorgex.cashbox.R;
@@ -33,6 +35,8 @@ import io.github.gorgex.cashbox.R;
 public class ProductEditDialog extends AppCompatDialogFragment {
 
     private TextInputLayout nameInputLayout;
+    private TextInputLayout priceInputLayout;
+    private TextInputLayout quantityInputLayout;
     private EditText productNameEditText;
     private EditText productPriceEditText;
     private EditText productQuantityEditText;
@@ -62,6 +66,8 @@ public class ProductEditDialog extends AppCompatDialogFragment {
         @SuppressLint("InflateParams") View view = inflater.inflate(R.layout.dialog_create_product, null);
 
         nameInputLayout = view.findViewById(R.id.nameInputLayout);
+        priceInputLayout = view.findViewById(R.id.priceInputLayout);
+        quantityInputLayout = view.findViewById(R.id.quantityInputLayout);
 
         productNameEditText = view.findViewById(R.id.productName);
         productPriceEditText = view.findViewById(R.id.productPrice);
@@ -70,27 +76,34 @@ public class ProductEditDialog extends AppCompatDialogFragment {
 
         inputMethodManager = (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
 
+        DecimalFormat priceFormat = new DecimalFormat();
+        priceFormat.setMinimumFractionDigits(2);
+
         productNameEditText.setText(name);
-        productPriceEditText.setText(String.valueOf(price));
-        productQuantityEditText.setText(String.valueOf(quantity));
+        productPriceEditText.setText(priceFormat.format(price));
+        productQuantityEditText.setText(DecimalFormat.getInstance().format(quantity));
 
         String p = productPriceEditText.getText().toString();
-        if(p.contains(".") && p.indexOf(".") == p.length() - 3) {
+        if (p.contains(".") && p.indexOf(".") == p.length() - 3) {
             productPriceEditText.setFilters(new InputFilter[]{new DecimalDigitsInputFilter()});
         }
 
         String q = productQuantityEditText.getText().toString();
-        if(q.contains(".") && q.indexOf(".") == q.length() - 3) {
+        if (q.contains(".") && q.indexOf(".") == q.length() - 3) {
             productQuantityEditText.setFilters(new InputFilter[]{new DecimalDigitsInputFilter()});
         }
 
-        if(type.equals("psc")) {
-            productTypeRadioButton = productTypeRadioGroup.findViewById(R.id.psc);
-            productTypeRadioGroup.check(productTypeRadioButton.getId());
-        } else if(type.equals("kg")) {
-            productTypeRadioButton = productTypeRadioGroup.findViewById(R.id.kg);
-            productTypeRadioGroup.check(productTypeRadioButton.getId());
+        if (type.equals("kg")) {
+            productTypeRadioGroup.check(productTypeRadioGroup.findViewById(R.id.kg).getId());
+            if (productQuantityEditText.getText().toString().contains(".")) {
+                productTypeRadioGroup.findViewById(R.id.psc).setEnabled(false);
+            }
+        } else {
+            productTypeRadioGroup.check(productTypeRadioGroup.findViewById(R.id.psc).getId());
         }
+
+        int checkedId = productTypeRadioGroup.getCheckedRadioButtonId();
+        productTypeRadioButton = productTypeRadioGroup.findViewById(checkedId);
 
         builder.setView(view)
                 .setTitle("Edit Product")
@@ -117,7 +130,6 @@ public class ProductEditDialog extends AppCompatDialogFragment {
         productNameEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
             }
 
             @Override
@@ -129,6 +141,8 @@ public class ProductEditDialog extends AppCompatDialogFragment {
             public void afterTextChanged(Editable editable) {
                 if (editable.toString().trim().isEmpty()) {
                     nameInputLayout.setError("Invalid name");
+                    save.setEnabled(false);
+                } else if (productPriceEditText.getText().toString().isEmpty() || productQuantityEditText.getText().toString().isEmpty()) {
                     save.setEnabled(false);
                 } else {
                     save.setEnabled(true);
@@ -144,15 +158,21 @@ public class ProductEditDialog extends AppCompatDialogFragment {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 productPriceEditText.setFilters(new InputFilter[]{new ProductEditDialog.DecimalDigitsInputFilter()});
+                priceInputLayout.setError(null);
             }
 
             @Override
             public void afterTextChanged(Editable editable) {
-                if (editable.length() == 1 && editable.charAt(0) == '.') {
+                if (editable.toString().isEmpty() || (editable.length() == 1 && editable.charAt(0) == '.')) {
                     productPriceEditText.removeTextChangedListener(this);
                     productPriceEditText.setText("");
                     productPriceEditText.addTextChangedListener(this);
-                } else if (productNameEditText.getText().toString().isEmpty()) {
+                    priceInputLayout.setError("Invalid price");
+                    save.setEnabled(false);
+                } else if (Double.valueOf(editable.toString()) == 0) {
+                    priceInputLayout.setError("Price can't be 0");
+                    save.setEnabled(false);
+                } else if (productNameEditText.getText().toString().trim().isEmpty() || productQuantityEditText.getText().toString().isEmpty()) {
                     save.setEnabled(false);
                 } else {
                     save.setEnabled(true);
@@ -168,21 +188,29 @@ public class ProductEditDialog extends AppCompatDialogFragment {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 productQuantityEditText.setFilters(new InputFilter[]{new ProductEditDialog.DecimalDigitsInputFilter()});
+                quantityInputLayout.setError(null);
 
-                if(s.toString().contains(".") && s.toString().indexOf(".") != 0) {
+                if (s.toString().contains(".") && s.toString().indexOf(".") != 0) {
                     productTypeRadioGroup.check(productTypeRadioGroup.findViewById(R.id.kg).getId());
+                    productTypeRadioGroup.findViewById(R.id.psc).setEnabled(false);
                 } else {
                     productTypeRadioGroup.check(productTypeRadioGroup.findViewById(R.id.psc).getId());
+                    productTypeRadioGroup.findViewById(R.id.psc).setEnabled(true);
                 }
             }
 
             @Override
             public void afterTextChanged(Editable editable) {
-                if (editable.length() == 1 && editable.charAt(0) == '.') {
+                if (editable.toString().isEmpty() || (editable.length() == 1 && editable.charAt(0) == '.')) {
                     productQuantityEditText.removeTextChangedListener(this);
                     productQuantityEditText.setText("");
                     productQuantityEditText.addTextChangedListener(this);
-                } else if (productNameEditText.getText().toString().isEmpty()) {
+                    quantityInputLayout.setError("Invalid quantity");
+                    save.setEnabled(false);
+                } else if (Double.valueOf(editable.toString()) == 0) {
+                    quantityInputLayout.setError("Quantity can't be 0");
+                    save.setEnabled(false);
+                } else if (productNameEditText.getText().toString().trim().isEmpty() || productPriceEditText.getText().toString().isEmpty()) {
                     save.setEnabled(false);
                 } else {
                     save.setEnabled(true);
@@ -201,12 +229,12 @@ public class ProductEditDialog extends AppCompatDialogFragment {
             @Override
             public void onClick(View view) {
                 String productName = productNameEditText.getText().toString().trim();
-                String productPrice = productPriceEditText.getText().toString();
-                String productQuantity = productQuantityEditText.getText().toString();
+                String productPrice = productPriceEditText.getText().toString().trim();
+                String productQuantity = productQuantityEditText.getText().toString().trim();
                 String productType = productTypeRadioButton.getText().toString();
 
-                price = productPrice.isEmpty() ? 0 : Double.parseDouble(productPrice);
-                quantity = productQuantity.isEmpty() ? 0 : Double.parseDouble(productQuantity);
+                price = Double.parseDouble(productPrice);
+                quantity = Double.parseDouble(productQuantity);
                 listener.editProduct(productName, price, quantity, productType);
                 inputMethodManager.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
                 dialog.dismiss();
@@ -233,7 +261,7 @@ public class ProductEditDialog extends AppCompatDialogFragment {
         @Override
         public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
             String value = dest.toString();
-            if(value.contains(".") && value.indexOf(".") == value.length() - 3) {
+            if (value.contains(".") && value.indexOf(".") == value.length() - 3) {
                 return "";
             }
             return null;
