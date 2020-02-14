@@ -37,10 +37,11 @@ public class DataManager {
         sharedPreferences = context.getSharedPreferences("shared preferences", MODE_PRIVATE);
         Gson gson = new Gson();
         String json = sharedPreferences.getString("products", null);
-        Type type = new TypeToken<ArrayList<Product>>() {}.getType();
+        Type type = new TypeToken<ArrayList<Product>>() {
+        }.getType();
         products = gson.fromJson(json, type);
 
-        if(products == null) {
+        if (products == null) {
             products = new ArrayList<>();
         }
 

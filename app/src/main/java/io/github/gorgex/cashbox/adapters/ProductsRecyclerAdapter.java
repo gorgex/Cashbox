@@ -10,6 +10,7 @@ import java.util.ArrayList;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
 import io.github.gorgex.cashbox.R;
 import io.github.gorgex.cashbox.model.Product;
 

@@ -15,4 +15,5 @@
     <string name="type_kg">%1$s kg</string>
     <string name="psc">psc</string>
     <string name="kg">kg</string>
+    <string name="left_in_stock">Only %1$s %2$s left in stock</string>
 </resources>

@@ -26,18 +26,20 @@ import java.util.Objects;
 
 import io.github.gorgex.cashbox.R;
 
-public class ProductBuyDialog extends AppCompatDialogFragment {
+public class ProductSellDialog extends AppCompatDialogFragment {
 
     private TextInputLayout quantityInputLayout;
     private EditText productQuantityEditText;
-    private Button add;
-    private ProductBuyDialogListener listener;
+    private Button sell;
+    private ProductSellDialogListener listener;
     private InputMethodManager inputMethodManager;
 
     private String type;
+    private double inStock;
 
-    ProductBuyDialog(String type) {
+    ProductSellDialog(String type, double inStock) {
         this.type = type;
+        this.inStock = inStock;
     }
 
     @NonNull
@@ -53,8 +55,8 @@ public class ProductBuyDialog extends AppCompatDialogFragment {
         inputMethodManager = (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
 
         builder.setView(view)
-                .setTitle("Add to stock")
-                .setPositiveButton("Add", null)
+                .setTitle("Sell a Product")
+                .setPositiveButton("Sell", null)
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -69,8 +71,8 @@ public class ProductBuyDialog extends AppCompatDialogFragment {
         final AlertDialog dialog = builder.create();
         dialog.show();
         dialog.setCanceledOnTouchOutside(false);
-        add = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
-        add.setEnabled(false);
+        sell = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+        sell.setEnabled(false);
 
         productQuantityEditText.addTextChangedListener(new TextWatcher() {
             @Override
@@ -90,12 +92,13 @@ public class ProductBuyDialog extends AppCompatDialogFragment {
                     productQuantityEditText.setText("");
                     productQuantityEditText.addTextChangedListener(this);
                     quantityInputLayout.setError("Invalid quantity");
-                    add.setEnabled(false);
+                    sell.setEnabled(false);
                 } else if (type.equals("psc") && editable.toString().contains(".")) {
                     productQuantityEditText.removeTextChangedListener(this);
                     productQuantityEditText.setText(editable.toString().replace(".", ""));
                     productQuantityEditText.setSelection(productQuantityEditText.getText().length());
                     productQuantityEditText.addTextChangedListener(this);
+                    checkStock(editable);
                 } else if (!editable.toString().isEmpty() && editable.charAt(0) == '.') {
                     productQuantityEditText.removeTextChangedListener(this);
                     productQuantityEditText.setText(editable.toString().substring(1));
@@ -105,22 +108,25 @@ public class ProductBuyDialog extends AppCompatDialogFragment {
                     productQuantityEditText.setText(editable.toString().substring(0, editable.toString().indexOf(".") + 3));
                     productQuantityEditText.setSelection(productQuantityEditText.getText().length());
                     productQuantityEditText.addTextChangedListener(this);
+                    checkStock(editable);
+                } else if (Double.parseDouble(editable.toString()) > inStock) {
+                    checkStock(editable);
                 } else if (Double.valueOf(editable.toString()) == 0) {
                     quantityInputLayout.setError("Quantity can't be 0");
-                    add.setEnabled(false);
+                    sell.setEnabled(false);
                 } else {
-                    add.setEnabled(true);
+                    sell.setEnabled(true);
                 }
             }
         });
 
-        add.setOnClickListener(new View.OnClickListener() {
+        sell.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String productQuantity = productQuantityEditText.getText().toString().trim();
                 double quantity = Double.parseDouble(productQuantity);
 
-                listener.buyProduct(quantity);
+                listener.sellProduct(quantity);
                 inputMethodManager.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
                 dialog.dismiss();
             }
@@ -129,12 +135,23 @@ public class ProductBuyDialog extends AppCompatDialogFragment {
         return dialog;
     }
 
+    private void checkStock(Editable editable) {
+        if (Double.parseDouble(editable.toString()) > inStock) {
+            if (type.equals("psc")) {
+                quantityInputLayout.setError(String.format(getResources().getString(R.string.left_in_stock), Integer.toString((int) inStock), type));
+            } else {
+                quantityInputLayout.setError(String.format(getResources().getString(R.string.left_in_stock), Double.toString(inStock), type));
+                sell.setEnabled(false);
+            }
+        }
+    }
+
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
 
         try {
-            listener = (ProductBuyDialog.ProductBuyDialogListener) context;
+            listener = (ProductSellDialog.ProductSellDialogListener) context;
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString() +
                     "Must implement ProductBuyDialogListener");
@@ -153,7 +170,7 @@ public class ProductBuyDialog extends AppCompatDialogFragment {
         }
     }
 
-    public interface ProductBuyDialogListener {
-        void buyProduct(double quantity);
+    public interface ProductSellDialogListener {
+        void sellProduct(double quantity);
     }
 }

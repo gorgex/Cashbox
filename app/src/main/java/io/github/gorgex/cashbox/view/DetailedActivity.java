@@ -1,6 +1,7 @@
 package io.github.gorgex.cashbox.view;
 
 import androidx.appcompat.app.AppCompatActivity;
+
 import io.github.gorgex.cashbox.R;
 
 import android.content.Intent;
@@ -29,7 +30,7 @@ public class DetailedActivity extends AppCompatActivity {
         toolbar.setTitle(intent.getStringExtra("product_name"));
         setSupportActionBar(toolbar);
 
-        if(getSupportActionBar() != null) {
+        if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setDisplayShowHomeEnabled(true);
         }
@@ -43,20 +44,20 @@ public class DetailedActivity extends AppCompatActivity {
         });
 
         inStock = findViewById(R.id.inStock);
-
         double stock = intent.getDoubleExtra("product_quantity", 0);
         String type = intent.getStringExtra("product_type");
-        if(stock > 0) {
-            assert type != null;
-            if(type.equals("psc")) {
-                inStock.setText(String.format(getResources().getString(R.string.in_stock), NumberFormat.getInstance().format(stock), "psc"));
-            } else {
-                inStock.setText(String.format(getResources().getString(R.string.in_stock), NumberFormat.getInstance().format(stock), "kg"));
-            }
+        if (stock > 0) {
+            inStock.setText(String.format(getResources().getString(R.string.in_stock), NumberFormat.getInstance().format(stock), type));
             inStock.setTextColor(getResources().getColor(R.color.colorPositive));
         } else {
             inStock.setText(getResources().getText(R.string.out_of_stock));
             inStock.setTextColor(getResources().getColor(R.color.colorNegative));
         }
+    }
+
+    @Override
+    public void finish() {
+        super.finish();
+        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
     }
 }

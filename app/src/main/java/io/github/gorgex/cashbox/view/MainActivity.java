@@ -33,7 +33,7 @@ import java.util.Objects;
 
 import static androidx.recyclerview.widget.ItemTouchHelper.ACTION_STATE_SWIPE;
 
-public class MainActivity extends AppCompatActivity implements ProductsRecyclerAdapter.OnProductClickListener, ProductsRecyclerAdapter.OnProductLongClickListener, ProductCreateDialog.ProductCreateDialogListener, ProductEditDialog.ProductEditDialogListener, ProductBuyDialog.ProductBuyDialogListener {
+public class MainActivity extends AppCompatActivity implements ProductsRecyclerAdapter.OnProductClickListener, ProductsRecyclerAdapter.OnProductLongClickListener, ProductCreateDialog.ProductCreateDialogListener, ProductEditDialog.ProductEditDialogListener, ProductBuyDialog.ProductBuyDialogListener, ProductSellDialog.ProductSellDialogListener {
 
     private ArrayList<Product> products = new ArrayList<>();
     private int selected;
@@ -98,6 +98,7 @@ public class MainActivity extends AppCompatActivity implements ProductsRecyclerA
             intent.putExtra("product_quantity", products.get(position).getQuantity());
             intent.putExtra("product_type", products.get(position).getType());
             startActivity(intent);
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
         }
     }
 
@@ -140,10 +141,25 @@ public class MainActivity extends AppCompatActivity implements ProductsRecyclerA
                         if (swipeBack) {
                             if (dX < -third) {
                                 selected = viewHolder.getAdapterPosition();
-                                Snackbar.make(recyclerView, "Sell", Snackbar.LENGTH_SHORT).setAnimationMode(BaseTransientBottomBar.ANIMATION_MODE_SLIDE).show();
+                                if (products.get(selected).getQuantity() <= 0) {
+                                    Snackbar snackbar = Snackbar.make(recyclerView, "Out of stock!", Snackbar.LENGTH_SHORT);
+                                    snackbar.setAnimationMode(BaseTransientBottomBar.ANIMATION_MODE_FADE);
+                                    snackbar.setAnchorView(fab);
+                                    snackbar.setAction("Add", new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
+                                            ProductBuyDialog dialog = new ProductBuyDialog(products.get(selected).getType());
+                                            dialog.show(getSupportFragmentManager(), "Buy a Product");
+                                        }
+                                    });
+                                    snackbar.show();
+                                } else {
+                                    ProductSellDialog dialog = new ProductSellDialog(products.get(selected).getType(), products.get(selected).getQuantity());
+                                    dialog.show(getSupportFragmentManager(), "Sell a Product");
+                                }
                             } else if (dX > third) {
                                 selected = viewHolder.getAdapterPosition();
-                                ProductBuyDialog dialog = new ProductBuyDialog();
+                                ProductBuyDialog dialog = new ProductBuyDialog(products.get(selected).getType());
                                 dialog.show(getSupportFragmentManager(), "Buy a Product");
                             }
                         }
@@ -229,6 +245,14 @@ public class MainActivity extends AppCompatActivity implements ProductsRecyclerA
     public void buyProduct(double quantity) {
         double inStock = products.get(selected).getQuantity();
         products.get(selected).setQuantity(inStock + quantity);
+        adapter.notifyItemChanged(selected);
+        dataManager.saveData();
+    }
+
+    @Override
+    public void sellProduct(double quantity) {
+        double inStock = products.get(selected).getQuantity();
+        products.get(selected).setQuantity(inStock - quantity);
         adapter.notifyItemChanged(selected);
         dataManager.saveData();
     }
