@@ -10,7 +10,10 @@ import android.text.Editable;
 import android.text.InputFilter;
 import android.text.Spanned;
 import android.text.TextWatcher;
+import android.view.ActionMode;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -50,6 +53,51 @@ public class ProductBuyDialog extends AppCompatDialogFragment {
 
         quantityInputLayout = view.findViewById(R.id.quantityInputLayout);
         productQuantityEditText = view.findViewById(R.id.productQuantity);
+        productQuantityEditText.setLongClickable(false);
+        productQuantityEditText.setTextIsSelectable(false);
+        productQuantityEditText.setCustomSelectionActionModeCallback(new ActionMode.Callback() {
+            @Override
+            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                return false;
+            }
+
+            @Override
+            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                return false;
+            }
+
+            @Override
+            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                return false;
+            }
+
+            @Override
+            public void onDestroyActionMode(ActionMode mode) {
+
+            }
+        });
+        productQuantityEditText.setCustomInsertionActionModeCallback(new ActionMode.Callback() {
+            @Override
+            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                return false;
+            }
+
+            @Override
+            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                return false;
+            }
+
+            @Override
+            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                return false;
+            }
+
+            @Override
+            public void onDestroyActionMode(ActionMode mode) {
+
+            }
+        });
+
         inputMethodManager = (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
 
         builder.setView(view)
@@ -81,35 +129,46 @@ public class ProductBuyDialog extends AppCompatDialogFragment {
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 productQuantityEditText.setFilters(new InputFilter[]{new DecimalDigitsInputFilter()});
                 quantityInputLayout.setError(null);
+
+                if (!s.toString().isEmpty() && s.toString().contains(".")) {
+                    if (s.toString().indexOf(".") == 0 || (s.toString().substring(s.toString().indexOf(".")).length() > 3)) {
+                        int dotPos = s.toString().indexOf(".");
+                        productQuantityEditText.removeTextChangedListener(this);
+                        productQuantityEditText.setText(s.toString().replace(".", ""));
+                        productQuantityEditText.setSelection(dotPos);
+                        productQuantityEditText.addTextChangedListener(this);
+                    }
+                }
             }
 
             @Override
             public void afterTextChanged(Editable editable) {
-                if (editable.toString().isEmpty() || (editable.toString().length() == 1 && editable.charAt(0) == '.')) {
+                try {
+                    if (editable.toString().isEmpty() || (editable.toString().length() == 1 && editable.charAt(0) == '.')) {
+                        productQuantityEditText.removeTextChangedListener(this);
+                        productQuantityEditText.setText("");
+                        productQuantityEditText.addTextChangedListener(this);
+                        quantityInputLayout.setError("Invalid quantity");
+                        add.setEnabled(false);
+                    } else if (Double.parseDouble(editable.toString()) == 0) {
+                        quantityInputLayout.setError("Quantity can't be 0");
+                        add.setEnabled(false);
+                    } else if (type.equals("psc") && editable.toString().contains(".")) {
+                        int dotPos = editable.toString().indexOf(".");
+                        productQuantityEditText.removeTextChangedListener(this);
+                        productQuantityEditText.setText(editable.toString().replace(".", ""));
+                        productQuantityEditText.setSelection(dotPos);
+                        productQuantityEditText.addTextChangedListener(this);
+                    } else {
+                        add.setEnabled(true);
+                    }
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
                     productQuantityEditText.removeTextChangedListener(this);
                     productQuantityEditText.setText("");
                     productQuantityEditText.addTextChangedListener(this);
                     quantityInputLayout.setError("Invalid quantity");
                     add.setEnabled(false);
-                } else if (type.equals("psc") && editable.toString().contains(".")) {
-                    productQuantityEditText.removeTextChangedListener(this);
-                    productQuantityEditText.setText(editable.toString().replace(".", ""));
-                    productQuantityEditText.setSelection(productQuantityEditText.getText().length());
-                    productQuantityEditText.addTextChangedListener(this);
-                } else if (!editable.toString().isEmpty() && editable.charAt(0) == '.') {
-                    productQuantityEditText.removeTextChangedListener(this);
-                    productQuantityEditText.setText(editable.toString().substring(1));
-                    productQuantityEditText.addTextChangedListener(this);
-                } else if (!editable.toString().isEmpty() && editable.toString().contains(".") && (editable.toString().substring(editable.toString().indexOf(".")).length() > 3)) {
-                    productQuantityEditText.removeTextChangedListener(this);
-                    productQuantityEditText.setText(editable.toString().substring(0, editable.toString().indexOf(".") + 3));
-                    productQuantityEditText.setSelection(productQuantityEditText.getText().length());
-                    productQuantityEditText.addTextChangedListener(this);
-                } else if (Double.valueOf(editable.toString()) == 0) {
-                    quantityInputLayout.setError("Quantity can't be 0");
-                    add.setEnabled(false);
-                } else {
-                    add.setEnabled(true);
                 }
             }
         });

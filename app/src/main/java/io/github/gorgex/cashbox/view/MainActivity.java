@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.view.ActionMode;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -94,9 +95,7 @@ public class MainActivity extends AppCompatActivity implements ProductsRecyclerA
             actionMode.finish();
         } else {
             Intent intent = new Intent(MainActivity.this, DetailedActivity.class);
-            intent.putExtra("product_name", products.get(position).getName());
-            intent.putExtra("product_quantity", products.get(position).getQuantity());
-            intent.putExtra("product_type", products.get(position).getType());
+            intent.putExtra("product", products.get(position));
             startActivity(intent);
             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
         }
@@ -104,9 +103,11 @@ public class MainActivity extends AppCompatActivity implements ProductsRecyclerA
 
     @Override
     public void onProductLongClick(int position) {
-        selected = position;
-        Objects.requireNonNull(layoutManager.findViewByPosition(position)).setBackgroundColor(getResources().getColor(R.color.colorSelected));
-        actionMode = startSupportActionMode(callback);
+        if (actionModeState == 0) {
+            selected = position;
+            Objects.requireNonNull(layoutManager.findViewByPosition(position)).setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.colorSelected));
+            actionMode = startSupportActionMode(callback);
+        }
     }
 
     ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
@@ -169,10 +170,10 @@ public class MainActivity extends AppCompatActivity implements ProductsRecyclerA
             }
 
             new RecyclerViewSwipeDecorator.Builder(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
-                    .addSwipeLeftBackgroundColor(getResources().getColor(R.color.colorNegative))
-                    .addSwipeLeftLabel("Sell").setSwipeLeftLabelColor(getResources().getColor(android.R.color.white))
-                    .addSwipeRightBackgroundColor(getResources().getColor(R.color.colorPositive))
-                    .addSwipeRightLabel("Buy").setSwipeRightLabelColor(getResources().getColor(android.R.color.white))
+                    .addSwipeLeftBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.colorNegative))
+                    .addSwipeLeftLabel("Sell").setSwipeLeftLabelColor(ContextCompat.getColor(getApplicationContext(), android.R.color.white))
+                    .addSwipeRightBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.colorPositive))
+                    .addSwipeRightLabel("Buy").setSwipeRightLabelColor(ContextCompat.getColor(getApplicationContext(), android.R.color.white))
                     .create()
                     .decorate();
 
@@ -218,7 +219,7 @@ public class MainActivity extends AppCompatActivity implements ProductsRecyclerA
 
         @Override
         public void onDestroyActionMode(ActionMode mode) {
-            Objects.requireNonNull(layoutManager.findViewByPosition(selected)).setBackgroundColor(getResources().getColor(R.color.colorDeselected));
+            Objects.requireNonNull(layoutManager.findViewByPosition(selected)).setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.colorDeselected));
             actionModeState = 0;
             actionMode = null;
         }

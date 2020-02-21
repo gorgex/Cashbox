@@ -12,7 +12,10 @@ import android.text.Editable;
 import android.text.InputFilter;
 import android.text.Spanned;
 import android.text.TextWatcher;
+import android.view.ActionMode;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -59,10 +62,141 @@ public class ProductCreateDialog extends AppCompatDialogFragment {
 
         productNameEditText = view.findViewById(R.id.productName);
         productNameEditText.setLongClickable(false);
+        productNameEditText.setTextIsSelectable(false);
+        productNameEditText.setCustomSelectionActionModeCallback(new ActionMode.Callback() {
+            @Override
+            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                return false;
+            }
+
+            @Override
+            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                return false;
+            }
+
+            @Override
+            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                return false;
+            }
+
+            @Override
+            public void onDestroyActionMode(ActionMode mode) {
+            }
+        });
+        productNameEditText.setCustomInsertionActionModeCallback(new ActionMode.Callback() {
+            @Override
+            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                return false;
+            }
+
+            @Override
+            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                return false;
+            }
+
+            @Override
+            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                return false;
+            }
+
+            @Override
+            public void onDestroyActionMode(ActionMode mode) {
+
+            }
+        });
+
         productPriceEditText = view.findViewById(R.id.productPrice);
         productPriceEditText.setLongClickable(false);
+        productPriceEditText.setTextIsSelectable(false);
+        productPriceEditText.setCustomSelectionActionModeCallback(new ActionMode.Callback() {
+            @Override
+            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                return false;
+            }
+
+            @Override
+            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                return false;
+            }
+
+            @Override
+            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                return false;
+            }
+
+            @Override
+            public void onDestroyActionMode(ActionMode mode) {
+
+            }
+        });
+        productPriceEditText.setCustomInsertionActionModeCallback(new ActionMode.Callback() {
+            @Override
+            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                return false;
+            }
+
+            @Override
+            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                return false;
+            }
+
+            @Override
+            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                return false;
+            }
+
+            @Override
+            public void onDestroyActionMode(ActionMode mode) {
+
+            }
+        });
+
         productQuantityEditText = view.findViewById(R.id.productQuantity);
         productQuantityEditText.setLongClickable(false);
+        productQuantityEditText.setTextIsSelectable(false);
+        productQuantityEditText.setCustomSelectionActionModeCallback(new ActionMode.Callback() {
+            @Override
+            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                return false;
+            }
+
+            @Override
+            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                return false;
+            }
+
+            @Override
+            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                return false;
+            }
+
+            @Override
+            public void onDestroyActionMode(ActionMode mode) {
+
+            }
+        });
+        productQuantityEditText.setCustomInsertionActionModeCallback(new ActionMode.Callback() {
+            @Override
+            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                return false;
+            }
+
+            @Override
+            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                return false;
+            }
+
+            @Override
+            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                return false;
+            }
+
+            @Override
+            public void onDestroyActionMode(ActionMode mode) {
+
+            }
+        });
+
         productTypeRadioGroup = view.findViewById(R.id.productType);
 
         final int checkedId = productTypeRadioGroup.getCheckedRadioButtonId();
@@ -138,7 +272,8 @@ public class ProductCreateDialog extends AppCompatDialogFragment {
                 if (editable.toString().trim().isEmpty()) {
                     nameInputLayout.setError("Invalid name");
                     save.setEnabled(false);
-                } else if (productPriceEditText.getText().toString().trim().isEmpty() || productQuantityEditText.getText().toString().trim().isEmpty()) {
+                } else if (productPriceEditText.getText().toString().trim().isEmpty() || Double.parseDouble(productPriceEditText.getText().toString()) == 0
+                        || productQuantityEditText.getText().toString().trim().isEmpty() || Double.parseDouble(productQuantityEditText.getText().toString()) == 0) {
                     save.setEnabled(false);
                 } else {
                     save.setEnabled(true);
@@ -156,34 +291,42 @@ public class ProductCreateDialog extends AppCompatDialogFragment {
                 productPriceEditText.setFilters(new InputFilter[]{new DecimalDigitsInputFilter()});
                 priceInputLayout.setError(null);
 
-                if (!s.toString().isEmpty() && s.toString().contains(".") && (s.toString().substring(s.toString().indexOf(".")).length() > 3)) {
-                    int dotPos = s.toString().indexOf(".");
-                    productPriceEditText.removeTextChangedListener(this);
-                    productPriceEditText.setText(s.toString().replace(".", ""));
-                    productPriceEditText.setSelection(dotPos);
-                    productPriceEditText.addTextChangedListener(this);
+                if (!s.toString().isEmpty() && s.toString().contains(".")) {
+                    if (s.toString().indexOf(".") == 0 || (s.toString().substring(s.toString().indexOf(".")).length() > 3)) {
+                        int dotPos = s.toString().indexOf(".");
+                        productPriceEditText.removeTextChangedListener(this);
+                        productPriceEditText.setText(s.toString().replace(".", ""));
+                        productPriceEditText.setSelection(dotPos);
+                        productPriceEditText.addTextChangedListener(this);
+                    }
                 }
             }
 
             @Override
             public void afterTextChanged(Editable editable) {
-                if (editable.toString().isEmpty() || (editable.toString().length() == 1 && editable.charAt(0) == '.')) {
+                try {
+                    if (editable.toString().isEmpty() || (editable.toString().length() == 1 && editable.charAt(0) == '.')) {
+                        productPriceEditText.removeTextChangedListener(this);
+                        productPriceEditText.setText("");
+                        productPriceEditText.addTextChangedListener(this);
+                        priceInputLayout.setError("Invalid price");
+                        save.setEnabled(false);
+                    } else if (Double.parseDouble(editable.toString()) == 0) {
+                        priceInputLayout.setError("Price can't be 0");
+                        save.setEnabled(false);
+                    } else if (productNameEditText.getText().toString().trim().isEmpty() || productQuantityEditText.getText().toString().trim().isEmpty()
+                            || Double.parseDouble(productQuantityEditText.getText().toString()) == 0) {
+                        save.setEnabled(false);
+                    } else {
+                        save.setEnabled(true);
+                    }
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
                     productPriceEditText.removeTextChangedListener(this);
                     productPriceEditText.setText("");
                     productPriceEditText.addTextChangedListener(this);
                     priceInputLayout.setError("Invalid price");
                     save.setEnabled(false);
-                } else if ((!editable.toString().isEmpty() && editable.charAt(0) == '.')) {
-                    productPriceEditText.removeTextChangedListener(this);
-                    productPriceEditText.setText(editable.toString().replace(".", ""));
-                    productPriceEditText.addTextChangedListener(this);
-                } else if (Double.valueOf(editable.toString()) == 0) {
-                    priceInputLayout.setError("Price can't be 0");
-                    save.setEnabled(false);
-                } else if (productNameEditText.getText().toString().trim().isEmpty() || productQuantityEditText.getText().toString().trim().isEmpty()) {
-                    save.setEnabled(false);
-                } else {
-                    save.setEnabled(true);
                 }
             }
         });
@@ -198,15 +341,17 @@ public class ProductCreateDialog extends AppCompatDialogFragment {
                 productQuantityEditText.setFilters(new InputFilter[]{new DecimalDigitsInputFilter()});
                 quantityInputLayout.setError(null);
 
-                if (!s.toString().isEmpty() && s.toString().contains(".") && (s.toString().substring(s.toString().indexOf(".")).length() > 3)) {
-                    int dotPos = s.toString().indexOf(".");
-                    productQuantityEditText.removeTextChangedListener(this);
-                    productQuantityEditText.setText(s.toString().replace(".", ""));
-                    productQuantityEditText.setSelection(dotPos);
-                    productQuantityEditText.addTextChangedListener(this);
-                } else if (s.toString().contains(".") && s.toString().indexOf(".") != 0) {
-                    productTypeRadioGroup.check(productTypeRadioGroup.findViewById(R.id.kg).getId());
-                    productTypeRadioGroup.findViewById(R.id.psc).setEnabled(false);
+                if (!s.toString().isEmpty() && s.toString().contains(".")) {
+                    if (s.toString().indexOf(".") == 0 || (s.toString().substring(s.toString().indexOf(".")).length() > 3)) {
+                        int dotPos = s.toString().indexOf(".");
+                        productQuantityEditText.removeTextChangedListener(this);
+                        productQuantityEditText.setText(s.toString().replace(".", ""));
+                        productQuantityEditText.setSelection(dotPos);
+                        productQuantityEditText.addTextChangedListener(this);
+                    } else if (s.toString().indexOf(".") != 0) {
+                        productTypeRadioGroup.check(productTypeRadioGroup.findViewById(R.id.kg).getId());
+                        productTypeRadioGroup.findViewById(R.id.psc).setEnabled(false);
+                    }
                 } else {
                     productTypeRadioGroup.findViewById(R.id.psc).setEnabled(true);
                 }
@@ -214,23 +359,29 @@ public class ProductCreateDialog extends AppCompatDialogFragment {
 
             @Override
             public void afterTextChanged(Editable editable) {
-                if (editable.toString().isEmpty() || (editable.toString().length() == 1 && editable.charAt(0) == '.')) {
+                try {
+                    if (editable.toString().isEmpty() || (editable.toString().length() == 1 && editable.charAt(0) == '.')) {
+                        productQuantityEditText.removeTextChangedListener(this);
+                        productQuantityEditText.setText("");
+                        productQuantityEditText.addTextChangedListener(this);
+                        quantityInputLayout.setError("Invalid quantity");
+                        save.setEnabled(false);
+                    } else if (Double.parseDouble(editable.toString()) == 0) {
+                        quantityInputLayout.setError("Quantity can't be 0");
+                        save.setEnabled(false);
+                    } else if (productNameEditText.getText().toString().trim().isEmpty() || productPriceEditText.getText().toString().trim().isEmpty()
+                            || Double.parseDouble(productPriceEditText.getText().toString()) == 0) {
+                        save.setEnabled(false);
+                    } else {
+                        save.setEnabled(true);
+                    }
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
                     productQuantityEditText.removeTextChangedListener(this);
                     productQuantityEditText.setText("");
                     productQuantityEditText.addTextChangedListener(this);
                     quantityInputLayout.setError("Invalid quantity");
                     save.setEnabled(false);
-                } else if (!editable.toString().isEmpty() && editable.charAt(0) == '.') {
-                    productQuantityEditText.removeTextChangedListener(this);
-                    productQuantityEditText.setText(editable.toString().replace(".", ""));
-                    productQuantityEditText.addTextChangedListener(this);
-                } else if (Double.valueOf(editable.toString()) == 0) {
-                    quantityInputLayout.setError("Quantity can't be 0");
-                    save.setEnabled(false);
-                } else if (productNameEditText.getText().toString().trim().isEmpty() || productPriceEditText.getText().toString().trim().isEmpty()) {
-                    save.setEnabled(false);
-                } else {
-                    save.setEnabled(true);
                 }
             }
         });
