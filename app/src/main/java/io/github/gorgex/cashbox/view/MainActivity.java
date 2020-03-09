@@ -130,10 +130,18 @@ public class MainActivity extends AppCompatActivity implements ProductsRecyclerA
             return super.convertToAbsoluteDirection(flags, layoutDirection);
         }
 
+        @Override
+        public int getSwipeDirs(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
+            if (actionModeState == 1) {
+                return 0;
+            }
+            return super.getSwipeDirs(recyclerView, viewHolder);
+        }
+
         @SuppressLint("ClickableViewAccessibility")
         @Override
         public void onChildDraw(@NonNull Canvas c, @NonNull final RecyclerView recyclerView, @NonNull final RecyclerView.ViewHolder viewHolder, final float dX, float dY, int actionState, boolean isCurrentlyActive) {
-            final double third = c.getWidth() / 3;
+            final double third = c.getWidth() / 3.0;
             if (actionState == ACTION_STATE_SWIPE) {
                 recyclerView.setOnTouchListener(new View.OnTouchListener() {
                     @Override
